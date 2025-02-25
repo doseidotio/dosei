@@ -6,9 +6,10 @@ use crate::command::login::login;
 use crate::command::logout::logout;
 use crate::command::new::new;
 use crate::command::whoami::whoami;
-use crate::command::{deploy, env, login, logout, new, whoami};
+use crate::command::{deploy, env, login, logout, new, run, whoami};
 use crate::config::Config;
 use clap::Command;
+use crate::command::run::run;
 
 fn cli() -> Command {
   Command::new("dosei")
@@ -17,6 +18,7 @@ fn cli() -> Command {
     .arg_required_else_help(true)
     .subcommand(login::command())
     .subcommand(logout::command())
+    .subcommand(run::command())
     .subcommand(whoami::command())
     .subcommand(deploy::command())
     .subcommand(new::command())
@@ -28,6 +30,7 @@ fn main() -> anyhow::Result<()> {
   match cli().get_matches().subcommand() {
     Some(("login", arg_matches)) => login(arg_matches, config)?,
     Some(("logout", _)) => logout(config)?,
+    Some(("run", arg_matches)) => run(arg_matches, config)?,
     Some(("whoami", _)) => whoami(config)?,
     Some(("new", arg_matches)) => new(arg_matches)?,
     Some(("env", params)) => match params.subcommand() {
