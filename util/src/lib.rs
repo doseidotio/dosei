@@ -62,6 +62,7 @@ pub fn dosei_service_config(directory: &Path) -> anyhow::Result<DoseiConfig> {
   Err(anyhow::Error::msg("No 'dosei.*' file found."))
 }
 
+#[derive(Debug)]
 pub struct DoseiConfig {
   pub path: PathBuf,
   pub extension: String,

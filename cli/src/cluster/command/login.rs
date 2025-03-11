@@ -5,6 +5,7 @@ use reqwest::blocking::Client;
 use serde_json::json;
 use std::io;
 use std::io::Write;
+use serde::{Deserialize, Serialize};
 
 pub fn command() -> Command {
   Command::new("login")
@@ -23,7 +24,7 @@ pub fn login(arg_matches: &ArgMatches, config: &'static Config) -> anyhow::Resul
     username.trim().to_string()
   };
 
-  let password = rpassword::prompt_password("Enter your password: ").unwrap();
+  let password = rpassword::prompt_password("Enter your password: ")?;
 
   let login_url = format!("{}/login", config.api_base_url);
   let body = json!({ "username": username, "password": password });

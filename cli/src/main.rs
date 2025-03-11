@@ -1,41 +1,51 @@
-mod command;
 mod config;
+pub(crate) mod auth;
+mod file;
+mod cluster;
+mod env;
+pub(crate) mod deploy;
+pub(crate) mod init;
+pub(crate) mod run;
+pub(crate) mod whoami;
+mod app;
 
-use crate::command::deploy::deploy;
-use crate::command::login::login;
-use crate::command::logout::logout;
-use crate::command::new::new;
-use crate::command::whoami::whoami;
-use crate::command::{deploy, env, login, logout, new, run, whoami};
+use deploy::deploy;
+use init::init;
+use run::run;
+use whoami::whoami;
 use crate::config::Config;
 use clap::Command;
-use crate::command::run::run;
+use crate::cluster::command::login::login;
+use crate::cluster::command::logout::logout;
 
 fn cli() -> Command {
   Command::new("dosei")
     .version(env!("CARGO_PKG_VERSION"))
     .subcommand_required(true)
     .arg_required_else_help(true)
-    .subcommand(login::command())
-    .subcommand(logout::command())
+    .subcommand(init::command())
     .subcommand(run::command())
     .subcommand(whoami::command())
     .subcommand(deploy::command())
-    .subcommand(new::command())
+    .subcommand(cluster::command::command())
     .subcommand(env::command())
 }
 
 fn main() -> anyhow::Result<()> {
   let config: &'static Config = Box::leak(Box::new(Config::new()?));
   match cli().get_matches().subcommand() {
-    Some(("login", arg_matches)) => login(arg_matches, config)?,
-    Some(("logout", _)) => logout(config)?,
     Some(("run", arg_matches)) => run(arg_matches, config)?,
+    Some(("init", arg_matches)) => init(arg_matches)?,
     Some(("whoami", _)) => whoami(config)?,
-    Some(("new", arg_matches)) => new(arg_matches)?,
     Some(("env", params)) => match params.subcommand() {
       Some(("set", arg_matches)) => env::set::set_env(arg_matches, config)?,
       Some(("unset", arg_matches)) => env::unset::unset_env(arg_matches, config)?,
+      _ => unreachable!(),
+    },
+    Some(("cluster", params)) => match params.subcommand() {
+      Some(("login", arg_matches)) => login(arg_matches, config)?,
+      Some(("logout", _)) => logout(config)?,
+      Some(("deploy", arg_matches)) => cluster::command::deploy::deploy(arg_matches, config)?,
       _ => unreachable!(),
     },
     Some(("deploy", _)) => deploy(config)?,

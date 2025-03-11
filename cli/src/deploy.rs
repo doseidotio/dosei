@@ -6,7 +6,7 @@ use std::time::Duration;
 use std::{env, fs};
 
 pub fn command() -> Command {
-  Command::new("deploy").about("Deploy Dosei App")
+  Command::new("deploy").about("Deploy a Dosei App")
 }
 
 pub fn deploy(config: &'static Config) -> anyhow::Result<()> {
