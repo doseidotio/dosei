@@ -1,25 +1,27 @@
-use std::fs;
-use crate::config::Config;
-use anyhow::{anyhow, Context};
-use clap::{Arg, ArgMatches, Command};
-use ssh2::Session;
-use std::io::{Read, Write};
-use std::net::TcpStream;
-use std::path::{Path, PathBuf};
-use dialoguer::Select;
 use crate::auth::ssh::schema::SSH;
 use crate::cluster::schema::{Cluster, ClusterInit};
+use crate::config::Config;
 use crate::file::expand_tilde;
+use anyhow::{anyhow, Context};
+use clap::{Arg, ArgAction, ArgMatches, Command};
+use colored::Colorize;
+use dialoguer::Select;
+use ssh2::Session;
+use std::io::Write;
+use std::net::TcpStream;
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 pub fn command() -> Command {
   Command::new("deploy")
     .about("Deploy a Dosei Cluster")
     .about("Check system information and if Docker is installed on a remote server via SSH")
+    .arg(Arg::new("env").long("env").short('e').help("env file"))
     .arg(
-      Arg::new("env")
-        .long("env")
-        .short('e')
-        .help("env file"),
+      Arg::new("allow-invalid-domain")
+        .long("allow-invalid-domain")
+        .help("Allow using an ip address, which will result in a non SSL API endpoint")
+        .action(ArgAction::SetTrue),
     )
 }
 
@@ -49,7 +51,9 @@ pub fn deploy(matches: &ArgMatches, _config: &'static Config) -> anyhow::Result<
 
   // No dosei files found
   if dosei_files.is_empty() {
-    return Err(anyhow::anyhow!("No dosei.js files found in current directory"));
+    return Err(anyhow::anyhow!(
+      "No dosei.js files found in current directory"
+    ));
   }
 
   // Find the file path based on rules
@@ -84,12 +88,38 @@ pub fn deploy(matches: &ArgMatches, _config: &'static Config) -> anyhow::Result<
   };
 
   println!("\n🪐 Deploying Dosei");
-  println!("⚙️  Using configuration file: {}", file_path.file_name().unwrap_or_default().to_string_lossy());
+  println!(
+    "⚙️  Using configuration file: {}",
+    file_path.file_name().unwrap_or_default().to_string_lossy()
+  );
 
   let dosei_js = Path::new(&file_path);
   Cluster::generate_json_file_from_node(dosei_js)?;
   let cluster = Cluster::from_json_file()?;
 
+  if !cluster.validate_domain() {
+    let ignore_no_domain = matches.get_flag("allow-invalid-domain");
+    eprintln!(
+      "{}",
+      format!(
+        "WARNING: Cluster name '{}' is not a fully qualified domain name.",
+        cluster.name
+      )
+      .yellow()
+    );
+    if !ignore_no_domain {
+      // Prompt user for confirmation
+      eprint!("Do you want to continue anyway? [y/N]: ");
+      io::stdout().flush().unwrap();
+
+      let mut input = String::new();
+      io::stdin().read_line(&mut input).unwrap();
+
+      if !input.trim().eq_ignore_ascii_case("y") {
+        return Err(anyhow!("Deployment cancelled due to invalid domain name"));
+      }
+    }
+  }
   let key_path_or_content = if let Some(identity) = cluster.identity {
     identity
   } else {
@@ -101,7 +131,9 @@ pub fn deploy(matches: &ArgMatches, _config: &'static Config) -> anyhow::Result<
 
   let server_url = if let Some(servers) = &cluster.servers {
     if servers.is_empty() {
-      return Err(anyhow!("Could not find SSH keys. Tried ~/.ssh/id_ed25519 and ~/.ssh/id_rsa"))
+      return Err(anyhow!(
+        "Could not find SSH keys. Tried ~/.ssh/id_ed25519 and ~/.ssh/id_rsa"
+      ));
     }
     servers.first().unwrap()
   } else {
@@ -118,7 +150,7 @@ pub fn deploy(matches: &ArgMatches, _config: &'static Config) -> anyhow::Result<
 
   if parts.len() != 2 {
     return Err(anyhow::anyhow!(
-        "Invalid server URL format. Expected user@hostname"
+      "Invalid server URL format. Expected user@hostname"
     ));
   }
 
@@ -135,31 +167,24 @@ pub fn deploy(matches: &ArgMatches, _config: &'static Config) -> anyhow::Result<
   sess.set_tcp_stream(tcp);
   sess.handshake().context("SSH handshake failed")?;
 
-  let dosei_public_key;
-  let dosei_pubic_key_email;
   if key_path_or_content.contains("-----BEGIN") {
-    let result = SSH::get_public_key_from_private_key(&key_path_or_content)?;
-    dosei_public_key = result.0;
-    dosei_pubic_key_email = result.1;
     let temp_file = tempfile::NamedTempFile::new().context("Failed to create temporary file")?;
     fs::write(&temp_file, key_path_or_content).context("Failed to write key to temp file")?;
-    sess.userauth_pubkey_file(username, None, temp_file.path(), None)
+    sess
+      .userauth_pubkey_file(username, None, temp_file.path(), None)
       .context("Authentication failed")?;
   } else {
     let expanded_path = expand_tilde(&key_path_or_content);
     let private_key_path = Path::new(&expanded_path);
-    let result = SSH::get_public_key_from_private_key_path(&private_key_path)?;
-    dosei_public_key = result.0;
-    dosei_pubic_key_email = result.1;
-    sess.userauth_pubkey_file(username, None, private_key_path, None)
+    sess
+      .userauth_pubkey_file(username, None, private_key_path, None)
       .context("Authentication failed")?;
   }
 
   // Create and serialize the ClusterInit object
   let cluster_init = ClusterInit {
     name: cluster.name.clone(),
-    dosei_public_key,
-    email: dosei_pubic_key_email,
+    dosei_public_key: SSH::generate_ed25519_key()?,
     accounts: cluster.accounts,
   };
 

@@ -2,10 +2,10 @@ use crate::config::{Config, SessionCredentials};
 use anyhow::anyhow;
 use clap::{Arg, ArgMatches, Command};
 use reqwest::blocking::Client;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::io;
 use std::io::Write;
-use serde::{Deserialize, Serialize};
 
 pub fn command() -> Command {
   Command::new("login")

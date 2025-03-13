@@ -2,15 +2,9 @@ use serde::{Deserialize, Serialize};
 
 pub struct SSH;
 
-#[derive(Serialize, Deserialize)]
-pub struct AuthPayload {
-  pub timestamp: String,
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct SSHBearerPayload {
+  pub namespace: String,
   pub nonce: String,
+  pub signature: Vec<u8>,
 }
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct SSHAuthToken {
-  pub payload: String,
-  pub signature: String,
-}
-

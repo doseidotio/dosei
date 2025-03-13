@@ -1,5 +1,5 @@
-use std::path::{Path, PathBuf};
 use home::home_dir;
+use std::path::{Path, PathBuf};
 
 // Function to expand ~ to home directory
 pub fn expand_tilde(path: &str) -> PathBuf {

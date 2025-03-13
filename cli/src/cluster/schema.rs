@@ -18,6 +18,5 @@ pub struct Cluster {
 pub struct ClusterInit {
   pub name: String,
   pub dosei_public_key: String,
-  pub email: String,
   pub accounts: Option<Vec<Account>>,
 }

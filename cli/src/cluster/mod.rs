@@ -1,10 +1,11 @@
+use crate::auth::ssh::schema::SSH;
+use crate::cluster::schema::{Cluster, ClusterInit};
+use anyhow::{anyhow, Context};
+use regex::Regex;
+use ssh2::Session;
 use std::fs;
 use std::path::Path;
 use std::process::Stdio;
-use anyhow::{anyhow, Context};
-use ssh2::Session;
-use crate::auth::ssh::schema::SSH;
-use crate::cluster::schema::{Cluster, ClusterInit};
 
 pub(crate) mod command;
 pub(crate) mod schema;
@@ -26,6 +27,13 @@ impl Cluster {
       .context(format!("Failed to read cluster file at {:?}", cluster_path))?;
     Ok(serde_json::from_str::<Self>(&app_data)?)
   }
+  fn validate_domain(&self) -> bool {
+    // This regex checks for a valid domain name pattern
+    // Domain must have at least one dot and valid characters
+    let domain_regex =
+      Regex::new(r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$").unwrap();
+    domain_regex.is_match(&self.name)
+  }
 }
 
 const REMOTE_CLUSTER_DEPLOY_LOCK_FILE: &str = "~/.dosei/deploy.lock";
@@ -41,7 +49,10 @@ impl ClusterInit {
       return Err(anyhow!("Another cluster deployment is in progress. If you're sure no other process is running, remove ~/.dosei/deploy.lock manually."));
     }
     // Create the lock file
-    SSH::execute_command(session, &format!("touch {}", REMOTE_CLUSTER_DEPLOY_LOCK_FILE))?;
+    SSH::execute_command(
+      session,
+      &format!("touch {}", REMOTE_CLUSTER_DEPLOY_LOCK_FILE),
+    )?;
 
     Ok(())
   }
@@ -61,7 +72,10 @@ impl ClusterInit {
 
     let running_result = SSH::execute_command(session, &check_running_command);
     if running_result.is_err() {
-      return Err(anyhow!("A container named '{}' is already running. Stop or remove it first.", container_name));
+      return Err(anyhow!(
+        "A container named '{}' is already running. Stop or remove it first.",
+        container_name
+      ));
     }
 
     // Check if the container exists but is stopped
@@ -73,10 +87,7 @@ impl ClusterInit {
     let exists_result = SSH::execute_command(session, &check_exists_command);
     if exists_result.is_ok() {
       // Container exists, remove it
-      SSH::execute_command(
-        session,
-        &format!("docker rm {}", container_name)
-      )?;
+      SSH::execute_command(session, &format!("docker rm {}", container_name))?;
     }
 
     // Get the current package version for the docker image tag
@@ -93,8 +104,7 @@ impl ClusterInit {
       -v ~/.dosei/postgres:/var/lib/postgresql/data \
       --name {} {}
       ",
-      container_name,
-      docker_image
+      container_name, docker_image
     );
 
     // Execute the docker run command
@@ -105,15 +115,18 @@ impl ClusterInit {
   }
 
   pub fn remove_lock(&self, session: &Session) -> anyhow::Result<()> {
-    SSH::execute_command(session, &format!("rm -f {}", REMOTE_CLUSTER_DEPLOY_LOCK_FILE))?;
+    SSH::execute_command(
+      session,
+      &format!("rm -f {}", REMOTE_CLUSTER_DEPLOY_LOCK_FILE),
+    )?;
     Ok(())
   }
 
   fn install_docker_on_remote(&self, session: &Session, username: &str) -> anyhow::Result<()> {
     println!("\n🐳 Docker Check:");
     // Check for docker binary
-    let docker_exists =
-      SSH::check_file_exists(&session, "/usr/bin/docker")? || SSH::check_file_exists(&session, "/bin/docker")?;
+    let docker_exists = SSH::check_file_exists(&session, "/usr/bin/docker")?
+      || SSH::check_file_exists(&session, "/bin/docker")?;
 
     if !docker_exists {
       println!("❌ Docker is NOT installed on the remote server");
@@ -175,9 +188,9 @@ impl ClusterInit {
     let (exit_code, output) = SSH::execute_command(session, add_repo_cmd)?;
     if exit_code != 0 {
       return Err(anyhow::anyhow!(
-      "Failed to add Docker repository: {}",
-      output
-    ));
+        "Failed to add Docker repository: {}",
+        output
+      ));
     }
 
     // Step 5: Update package index again
@@ -185,9 +198,9 @@ impl ClusterInit {
     let (exit_code, output) = SSH::execute_command(session, "sudo apt-get update")?;
     if exit_code != 0 {
       return Err(anyhow::anyhow!(
-      "Failed to update package index: {}",
-      output
-    ));
+        "Failed to update package index: {}",
+        output
+      ));
     }
 
     // Step 6: Install Docker
@@ -205,9 +218,9 @@ impl ClusterInit {
     let (exit_code, output) = SSH::execute_command(session, &add_user_cmd)?;
     if exit_code != 0 {
       return Err(anyhow::anyhow!(
-      "Failed to add user to docker group: {}",
-      output
-    ));
+        "Failed to add user to docker group: {}",
+        output
+      ));
     }
 
     // Step 8: Verify docker installation
@@ -223,7 +236,8 @@ impl ClusterInit {
 
   pub fn save_to_cluster(&self, session: &Session) -> anyhow::Result<()> {
     let cluster_init_json = serde_json::to_string_pretty(self)
-      .context("Failed to serialize ClusterInit to JSON")?.replace("'", "'\\''");
+      .context("Failed to serialize ClusterInit to JSON")?
+      .replace("'", "'\\''");
     let write_cmd = format!(
       "mkdir -p ~/.dosei/doseid && cat > ~/.dosei/doseid/cluster-init.json << 'EOF'\n{}\nEOF",
       cluster_init_json

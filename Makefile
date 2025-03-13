@@ -1,6 +1,9 @@
 build:
 	cargo build --release
 
+cli.build:
+	cargo build -p dosei
+
 dev:
 	cargo run --bin doseid
 

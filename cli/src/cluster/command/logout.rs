@@ -1,16 +1,17 @@
+use crate::auth::ssh::schema::SSHBearerPayload;
 use crate::config::Config;
 use anyhow::anyhow;
 use clap::Command;
 use reqwest::StatusCode;
 use serde_json::Value;
-use crate::auth::ssh::schema::SSHAuthToken;
 
 pub fn command() -> Command {
   Command::new("logout").about("Log out from a cluster")
 }
 
 pub fn logout(config: &'static Config) -> anyhow::Result<()> {
-  let token = SSHAuthToken::new()?;;
+  let token = SSHBearerPayload::new()?;
+  println!("{:?}", token);
   // let logout_url = format!("{}/logout", config.api_base_url);
   //
   // let session = config

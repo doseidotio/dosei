@@ -1,22 +1,22 @@
-mod config;
+mod app;
 pub(crate) mod auth;
-mod file;
 mod cluster;
-mod env;
+mod config;
 pub(crate) mod deploy;
+mod env;
+mod file;
 pub(crate) mod init;
 pub(crate) mod run;
 pub(crate) mod whoami;
-mod app;
 
+use crate::cluster::command::login::login;
+use crate::cluster::command::logout::logout;
+use crate::config::Config;
+use clap::Command;
 use deploy::deploy;
 use init::init;
 use run::run;
 use whoami::whoami;
-use crate::config::Config;
-use clap::Command;
-use crate::cluster::command::login::login;
-use crate::cluster::command::logout::logout;
 
 fn cli() -> Command {
   Command::new("dosei")
