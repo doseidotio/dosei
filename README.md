@@ -3,9 +3,8 @@
     <img alt="dosei-logo" src=".github/assets/logo-white.svg#gh-dark-mode-only">
 </p>
 
-[//]: # (<h3 align="center">Dosei</h3>)
 <p align="center">
-The open source successor to AWS Fargate and Cloud Run.<br/>
+The open source successor to AWS Fargate, done right.<br/>
 <br />
 <a href="https://dosei.ai/docs"><strong>Read the docs »</strong></a>
 <br />
@@ -16,43 +15,32 @@ The open source successor to AWS Fargate and Cloud Run.<br/>
 [![X (formerly Twitter)](https://img.shields.io/twitter/follow/dosei_ai?style=flat&logo=x)](https://x.com/dosei_ai)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-white)](https://www.gnu.org/licenses/agpl-3.0.en.html#license-text)
 
-## The infrastructure runtime for Developers
+## What is Dosei?
 
-The open-source [Google Cloud Run](https://cloud.google.com/run) successor. Google Cloud Run and other container orchestration services are awesome. It has made Developers work massively easier when we compare it
-to operating a Kubernetes Cluster. However, most services are either non-portable (aka. "proprietary") or built on top of K8S, which makes it hard to test and operate applications infrastructure, specially locally.
+Dosei is an open-source platform that makes deploying web applications simple and portable. It functions as an infrastructure runtime designed specifically for developers, offering:
 
-That's where Dosei comes in! Self-hosted, IaC and local development first experience.
+- Zero downtime deployments with automatic SSL provisioning and renewal
+- Language-agnostic Infrastructure as Code
+- First-class local development experience
+- Secure, scalable, and cost-effective deployments
+- Extensible architecture
 
-#### Key Features
+## Vision
 
-- **Fast**: 🦀 [Rust](https://www.rust-lang.org/) is blazingly fast and Dosei is built on top of it!
-- **Language agnostic IaC**: We officially support SDKS in [Python](https://github.com/doseiai/python-sdk) and [JavaScript](https://github.com/doseiai/javascript-sdk)
-- **Local first**: Build, test and run your infrastructure locally!
-- [Cron Jobs](https://dosei.ai/docs/cron-jobs): Locally testable, versioned and scalable Cron Jobs! 
+We're building Dosei to be intuitive and extensible. Our goal is to create a platform that developers can easily understand, use, and customize to their needs.
 
-At it's core Dosei is really an infrastructure runtime for Developers
+While we have core functionality in place and have prototyped various extensions, we're actively seeking community input on where and how to implement additional extensibility.
 
-## Getting started
-> 🚨 **Dosei is under active development.** While under development every version change should be assumed to be **breaking**.
+Share your thoughts and ideas on our [Discord](https://discord.com/invite/BP5aUkhcAh)!
 
-This is an installation guide. You'll learn how to install, run, and experiment with Dosei.
+## Getting Started
 
-### Requirements
-
-This is what you need to run Dosei.
-
-- Docker
-
-### Run Dosei with Docker
-
-```
-docker run -v /var/run/docker.sock:/var/run/docker.sock doseiai/dosei
-```
+Follow our [Getting Started Guide](https://dosei.ai/docs/getting-started) to install Dosei and deploy your first application.
 
 ## License
 
-Dosei is an open-source project under the [AGPL-3.0 license](LICENSE).
+Dosei is open source software licensed under the [AGPL-3.0 license](LICENSE).
 
-## Join the community
+## Community
 
-If you have questions about Dosei, reach out to Dosei community members and developers on our [Discord Server](https://discord.com/invite/BP5aUkhcAh).
+Have questions or need help? Join the Dosei community on our [Discord Server](https://discord.com/invite/BP5aUkhcAh).
