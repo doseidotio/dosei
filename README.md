@@ -3,56 +3,50 @@
     <img alt="dosei-logo" src=".github/assets/logo-white.svg#gh-dark-mode-only">
 </p>
 
-[//]: # (<h3 align="center">Dosei</h3>)
 <p align="center">
-The open source <a href="https://cloud.google.com/run"> Google Cloud Run</a> successor.<br/>
+The Local-First Kubernetes Successor for Developers.<br/>
 <br />
-<a href="https://dosei.ai/docs"><strong>Read the docs »</strong></a>
+<a href="https://dosei.io/docs"><strong>Read the docs »</strong></a>
 <br />
 <br />
 </p>
 
 [![](https://img.shields.io/discord/1144175748559683615?logo=discord&logoColor=7289DA&label=Discord)](https://discord.com/invite/BP5aUkhcAh)
-[![X (formerly Twitter)](https://img.shields.io/twitter/follow/dosei_ai?style=flat&logo=x)](https://x.com/dosei_ai)
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-white)](https://www.apache.org/licenses/LICENSE-2.0)
+[![X (formerly Twitter)](https://img.shields.io/twitter/follow/doseidotio?style=flat&logo=x)](https://x.com/doseidotio)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-white)](https://www.gnu.org/licenses/agpl-3.0.en.html#license-text)
 
-## The infrastructure runtime for Developers
+## What is Dosei?
 
-The open-source [Google Cloud Run](https://cloud.google.com/run) successor. Google Cloud Run and other container orchestration services are awesome. It has made Developers work massively easier when we compare it
-to operating a Kubernetes Cluster. However, most services are either non-portable (aka. "proprietary") or built on top of K8S, which makes it hard to test and operate applications infrastructure, specially locally.
+Dosei is a container orchestration platform built around several key principles that set it apart from other solutions:
 
-That's where Dosei comes in! Self-hosted, IaC and local development first experience.
+- **Local-First Architecture** - Dosei prioritizes the local development experience by providing developers with comprehensive programming language capabilities to manage infrastructure. This means you can run 100% offline while maintaining full compatibility—your local setup works seamlessly when deployed to remote clusters.
 
-#### Key Features
+- **Infrastructure as Code (IaC) Core** - IaC isn't an afterthought but a fundamental design principle, ensuring all infrastructure is defined, versioned, and managed through code.
 
-- **Fast**: 🦀 [Rust](https://www.rust-lang.org/) is blazingly fast and Dosei is built on top of it!
-- **Language agnostic IaC**: We officially support SDKS in [Python](https://github.com/doseiai/python-sdk) and [JavaScript](https://github.com/doseiai/javascript-sdk)
-- **Local first**: Build, test and run your infrastructure locally!
-- [Cron Jobs](https://dosei.ai/docs/cron-jobs): Locally testable, versioned and scalable Cron Jobs! 
+- **Language Agnostic** - Dosei provides SDKs in different programming languages. Currently, it only supports JavaScript, but it doesn't lock you into a custom IaC language.
 
-At it's core Dosei is really an infrastructure runtime for Developers
+- **GitOps-First Approach** - All changes flow through Git workflows, providing clear audit trails and collaborative change management.
 
-## Getting started
-> 🚨 **Dosei is under active development.** While under development every version change should be assumed to be **breaking**.
+- **Read-Only Dashboard** - Unlike other PaaS or cloud providers, Dosei's dashboard is intentionally read-only. All modifications must be made through code, enforcing consistency and preventing configuration drift.
 
-This is an installation guide. You'll learn how to install, run, and experiment with Dosei.
+This approach ensures that your infrastructure remains predictable, auditable, and aligned with modern DevOps best practices.
 
-### Requirements
+## Vision
 
-This is what you need to run Dosei.
+We're building Dosei to be intuitive and extensible. Our goal is to create infrastructure that is tightly coupled with your application and runs local-first.
 
-- Docker
+While we have core functionality in place and have prototyped various extensions, we're actively seeking community input on where and how to implement additional extensibility.
 
-### Run Dosei with Docker
+Share your thoughts and ideas on our [Discord](https://discord.com/invite/BP5aUkhcAh)!
 
-```
-docker run -v /var/run/docker.sock:/var/run/docker.sock doseiai/dosei
-```
+## Getting Started
+
+Follow our [Getting Started Guide](https://dosei.io/docs/getting-started) to install Dosei and deploy your first application.
 
 ## License
 
-Dosei is an open-source project under the [Apache-2.0 license](LICENSE).
+Dosei is open source software licensed under the [AGPL-3.0 license](LICENSE).
 
-## Join the community
+## Community
 
-If you have questions about Dosei, reach out to Dosei community members and developers on our [Discord Server](https://discord.com/invite/BP5aUkhcAh).
+Have questions or need help? Join the Dosei community on our [Discord Server](https://discord.com/invite/BP5aUkhcAh).

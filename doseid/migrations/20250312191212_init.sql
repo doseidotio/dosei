@@ -1,0 +1,85 @@
+CREATE TABLE IF NOT EXISTS account (
+    id UUID NOT NULL,
+    name TEXT NOT NULL,
+    password TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE (name)
+);
+
+CREATE TABLE IF NOT EXISTS account_ssh_key (
+    id UUID NOT NULL,
+    key_fingerprint TEXT NOT NULL,
+    ssh_key TEXT NOT NULL,
+    account_id UUID NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES account(id),
+    UNIQUE (key_fingerprint),
+    UNIQUE (ssh_key)
+);
+
+CREATE TABLE IF NOT EXISTS session (
+    id UUID NOT NULL,
+    token TEXT NOT NULL,
+    refresh_token TEXT NOT NULL,
+    account_id UUID NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES account(id)
+);
+
+
+CREATE TABLE IF NOT EXISTS service (
+    id UUID NOT NULL,
+    name TEXT NOT NULL,
+    owner_id UUID NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (owner_id) REFERENCES account(id),
+    UNIQUE (name, owner_id)
+);
+
+CREATE TABLE IF NOT EXISTS deployment (
+    id UUID NOT NULL,
+    service_id UUID NOT NULL,
+    owner_id UUID NOT NULL,
+    host_port smallint,
+    container_port smallint,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (owner_id) REFERENCES account(id),
+    FOREIGN KEY (service_id) REFERENCES service(id)
+);
+
+CREATE TABLE IF NOT EXISTS ingress (
+    id UUID NOT NULL,
+    service_id UUID NOT NULL,
+    owner_id UUID NOT NULL,
+    host TEXT NOT NULL,
+    path TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (owner_id) REFERENCES account(id),
+    FOREIGN KEY (service_id) REFERENCES service(id)
+);
+
+CREATE TABLE IF NOT EXISTS certificate (
+    id UUID NOT NULL,
+    domain_name TEXT NOT NULL,
+    certificate TEXT NOT NULL,
+    private_key TEXT NOT NULL,
+    expires_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    owner_id UUID NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (owner_id) REFERENCES account(id),
+    UNIQUE (domain_name)
+);

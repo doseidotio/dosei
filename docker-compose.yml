@@ -1,17 +1,43 @@
-version: "3.9"
-
 services:
+  dosei:
+    container_name: dosei
+    build:
+      context: .
+      dockerfile: devcontainer.Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2222:22"  # SSH port
+    volumes:
+      - dosei-cargo-data:/root/.cargo
+      - dosei-rustup-data:/root/.rustup
+      - ./:/workspace
+      - ./target:/workspace/target
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.ssh/id_ed25519:/root/.ssh/id_ed25519
+      - ~/.ssh/id_ed25519.pub:/root/.ssh/id_ed25519.pub
+      - ~/.ssh/id_ed25519.pub:/root/.ssh/authorized_keys
+      - ~/.dosei/doseid/cluster-init.json:/var/lib/doseid/cluster-init.json
+    environment:
+      - SHELL=/bin/bash
+    command: /bin/sh -c "service ssh start && tail -f /dev/null"  # Start SSH and keep container running
   postgres:
-    container_name: postgres
-    restart: always
-    image: postgres:16.1
+    container_name: dosei-postgres
+    image: postgres:16
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+      - /var/run/postgresql:/var/run/postgresql
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_HOST: "/var/run/postgresql"
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - '5432:5432'
     command: >
       -c log_connections=on
       -c log_disconnections=on
+      -c unix_socket_directories=/var/run/postgresql
+
+volumes:
+  dosei-cargo-data:
+  dosei-rustup-data:

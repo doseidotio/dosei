@@ -1,25 +1,19 @@
 [workspace]
-members = ["proto", "doseid", "proxy", "util", 'cli']
+members = [ "cli","doseid", "doseid-macros", "macos-rust", "schema", "util"]
 resolver = "2"
 
 [workspace.package]
-version = "0.0.23"
-license = "Apache-2.0"
-repository = "https://github.com/doseiai/dosei"
-authors = [
-    "Alvaro Molina <am@dosei.ai>",
-    "Rahul Lakhanpal <rahulkp220@gmail.com>",
-]
+version = "0.4.11"
+license = "AGPL-3.0"
+repository = "https://github.com/doseidotio/dosei"
+authors = ["Dosei Team <hi@dosei.io>"]
 edition = "2021"
 
 [workspace.dependencies]
-clap = { version = "4.4.18", features = ["derive"] }
-tokio = { version = "1.35.1", features = ["full"] }
-serde_json = "1.0.113"
-serde = { version = "1.0.196", features = ["derive"] }
-uuid = { version = "1.7.0", features = ["v4"] }
-prost = { version = "0.12.3" }
-prost-build = { version = "0.12.3" }
-dotenv = { version = "0.15.0" }
-toml = { version = "0.8.8" }
-regex = { version = "1.10.3" }
+base64 = "0.22.1"
+serde = { version = "1.0.218", features = ["derive"] }
+serde_json = "1.0.140"
+anyhow = "1.0.97"
+ssh-key = { version = "0.6.7", features = ["ed25519", "rsa", "rand_core"] }
+regex = "1.11.1"
+dialoguer = "0.11.0"
