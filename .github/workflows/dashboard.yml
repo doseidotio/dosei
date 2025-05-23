@@ -2,19 +2,15 @@ name: dashboard
 
 on:
   push:
-    branches: [ "feat/0.4" ]
     tags:
       - '*'
-  pull_request:
-    branches: [ "feat/0.4" ]
 
 concurrency:
   group: dashboard-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -26,18 +22,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Docker Build
-        uses: docker/build-push-action@v5
-        with:
-          context: "{{defaultContext}}:dashboard"
-          push: false
-          tags: doseidotio/dashboard
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
       - name: Login to Docker Hub
-        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || startsWith(github.ref, 'refs/tags/')
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -53,16 +38,5 @@ jobs:
           tags: |
             doseidotio/dashboard
             doseidotio/dashboard:${{ github.sha }}
-          cache-from: type=gha
-
-      - name: Docker Push Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: docker/build-push-action@v5
-        with:
-          context: "{{defaultContext}}:dashboard"
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            doseidotio/dashboard
             doseidotio/dashboard:${{ github.ref_name }}
           cache-from: type=gha
