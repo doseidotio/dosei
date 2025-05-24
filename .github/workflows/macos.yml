@@ -18,6 +18,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: check xcode
+        run: find /Applications/ -name "Xcode*.app" -type d
+
       - name: Install Rust
         uses: dsherret/rust-toolchain-file@v1
 
