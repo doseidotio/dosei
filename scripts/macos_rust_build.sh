@@ -23,7 +23,7 @@ lipo -create \
   "target/x86_64-apple-darwin/release/dosei" \
   -output "$RESOURCES_PATH/bin/dosei"
 
-chmod +x "$RESOURCES_PATH/macos-rust"
+chmod +x "$RESOURCES_PATH/bin/macos-rust"
 chmod +x "$RESOURCES_PATH/bin/dosei"
 
 cp ./scripts/post_install.sh "$RESOURCES_PATH/post_install.sh"
