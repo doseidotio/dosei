@@ -902,7 +902,7 @@ dependencies = [
 
 [[package]]
 name = "dosei"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -932,7 +932,7 @@ dependencies = [
 
 [[package]]
 name = "dosei-schema"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -944,7 +944,7 @@ dependencies = [
 
 [[package]]
 name = "dosei_util"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "anyhow",
  "dialoguer",
@@ -957,7 +957,7 @@ dependencies = [
 
 [[package]]
 name = "doseid"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1000,7 +1000,7 @@ dependencies = [
 
 [[package]]
 name = "doseid-macros"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "quote",
  "syn",
@@ -2012,7 +2012,7 @@ dependencies = [
 
 [[package]]
 name = "macos-rust"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "anyhow",
  "bollard",
