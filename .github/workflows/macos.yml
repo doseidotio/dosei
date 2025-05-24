@@ -35,6 +35,8 @@ jobs:
       - name: Build Dosei.app
         run: |
           cd macos
+          
+          sudo xcode-select -s /Applications/Xcode_16.0.app
           xcodebuild -target Dosei -configuration Release
 
       - name: macOS Codesign
