@@ -32,6 +32,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+
       - name: Docker Build and Push
         uses: docker/build-push-action@v5
         with:
@@ -41,6 +43,6 @@ jobs:
           tags: |
             doseidotio/dashboard
             doseidotio/dashboard:${{ github.sha }}
-            doseidotio/dashboard:${{ github.ref_name }}
+            doseidotio/dashboard:${{ env.VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
