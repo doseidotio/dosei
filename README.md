@@ -14,6 +14,7 @@ The Local-First Kubernetes Successor for Developers.<br/>
 [![](https://img.shields.io/discord/1144175748559683615?logo=discord&logoColor=7289DA&label=Discord)](https://discord.com/invite/BP5aUkhcAh)
 [![X (formerly Twitter)](https://img.shields.io/twitter/follow/doseidotio?style=flat&logo=x)](https://x.com/doseidotio)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-white)](https://www.gnu.org/licenses/agpl-3.0.en.html#license-text)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/doseidotio/dosei?sort=semver)
 
 ## What is Dosei?
 
