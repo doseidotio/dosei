@@ -21,7 +21,23 @@ jobs:
       - name: Install Rust
         uses: dsherret/rust-toolchain-file@v1
 
-      - name: macOS CI
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-all-crates: true
+
+      - name: Install x86_64-apple-darwin
+        run: rustup target add x86_64-apple-darwin
+
+      - name: Build macOS Rust
+        run: ./scripts/macos_rust_build.sh
+
+      - name: Build Dosei.app
+        run: |
+          cd macos
+          xcodebuild -target Dosei -configuration Release
+
+      - name: macOS Codesign
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
@@ -41,26 +57,32 @@ jobs:
           
           # Set partition list 
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
+          
+          RESOURCES_PATH="macos/Dosei/Contents/Resources"
+          
+          # Codesign Dosei CLI and macos-rust
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime "$RESOURCES_PATH/bin/dosei"
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime "$RESOURCES_PATH/macos-rust"
+          
+          # Codesign App Bundle
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --entitlements "macos/Dosei.entitlements" macos/build/Release/Dosei.app
 
-#      - name: Rust Cache
-#        uses: Swatinem/rust-cache@v2
-#        with:
-#          cache-all-crates: true
-#
-#      - name: Install x86_64-apple-darwin
-#        run: rustup target add x86_64-apple-darwin
-#
-#      - name: Build macOS Rust
-#        run: ./scripts/macos_rust_build.sh
-#
-#      - name: macOS Release
-#        run: ./scripts/macos_release.sh
-#
-#      - name: Upload dmg
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: Dosei.dmg
-#          path: target/Dosei.dmg
+      - name: Create DMG
+        env:
+          MACOS_CERTIFICATE_NAME: ${{ secrets.MACOS_CERTIFICATE_NAME }}
+        run: |
+          npm install --global create-dmg
+          create-dmg \
+            --identity="$MACOS_CERTIFICATE_NAME" \
+            ./macos/build/Release/Dosei.app \
+            ./
+          mv ./Dosei*.dmg ./Dosei.dmg
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dosei.dmg
+          path: Dosei.dmg
 
 #  release:
 #    name: Release
