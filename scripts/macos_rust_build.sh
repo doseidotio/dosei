@@ -3,7 +3,7 @@ set -e
 
 RESOURCES_PATH="macos/Dosei/Contents/Resources"
 
-mkdir -p "$RESOURCES_PATH/bin"
+mkdir -p "$RESOURCES_PATH"
 
 echo "Building for Apple Silicon (aarch64)..."
 cargo build --bin macos-rust --release --target aarch64-apple-darwin
@@ -21,15 +21,9 @@ lipo -create \
 lipo -create \
   "target/aarch64-apple-darwin/release/dosei" \
   "target/x86_64-apple-darwin/release/dosei" \
-  -output "$RESOURCES_PATH/bin/dosei"
+  -output "$RESOURCES_PATH/dosei"
 
 chmod +x "$RESOURCES_PATH/macos-rust"
-chmod +x "$RESOURCES_PATH/bin/dosei"
+chmod +x "$RESOURCES_PATH/dosei"
 
 cp ./scripts/post_install.sh "$RESOURCES_PATH/post_install.sh"
-
-codesign --force --options runtime --sign "Apple Development: Alvaro Molina (BHFW3S86WS)" "$RESOURCES_PATH/macos-rust"
-echo "Universal binary created successfully at $RESOURCES_PATH/macos-rust"
-
-codesign --force --options runtime --sign "Apple Development: Alvaro Molina (BHFW3S86WS)" "$RESOURCES_PATH/bin/dosei"
-echo "Universal binary created successfully at $RESOURCES_PATH/bin/dosei"

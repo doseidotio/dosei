@@ -1,0 +1,121 @@
+name: macos
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dsherret/rust-toolchain-file@v1
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-all-crates: true
+          cache-on-failure: true
+
+      - name: Install x86_64-apple-darwin
+        run: rustup target add x86_64-apple-darwin
+
+      - name: Build macOS Rust
+        run: ./scripts/macos_rust_build.sh
+
+      - name: Build Dosei.app
+        run: |
+          cd macos
+          
+          sudo xcode-select -s /Applications/Xcode_16.2.app
+          xcodebuild -target Dosei -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+
+
+      - name: macOS Codesign
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_CERTIFICATE_NAME: ${{ vars.MACOS_CERTIFICATE_NAME }}
+          MACOS_CI_KEYCHAIN_PWD: ${{ secrets.MACOS_CI_KEYCHAIN_PWD }}
+        run: |
+          # Turn our base64-encoded certificate back to a regular .p12 file
+          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+          
+          # Create keychain, default it and unlock
+          security create-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
+          
+          # Import certificate
+          security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
+          
+          # Set partition list 
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
+          
+          RESOURCES_PATH="macos/Dosei/Contents/Resources"
+          
+          APP_PATH="macos/build/Release/Dosei.app"
+          RESOURCES_PATH="$APP_PATH/Contents/Resources"
+          MACOS_PATH="$APP_PATH/Contents/MacOS"
+          
+          # Sign all binaries with hardened runtime and timestamp
+          echo "Signing individual binaries..."
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --timestamp "$RESOURCES_PATH/dosei"
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --timestamp "$RESOURCES_PATH/macos-rust"
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --timestamp "$MACOS_PATH/Dosei"
+          
+          # Sign the entire App Bundle last
+          echo "Signing app bundle..."
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --timestamp --entitlements "macos/Dosei/Dosei.entitlements" "$APP_PATH"
+
+      - name: Create DMG
+        env:
+          MACOS_CERTIFICATE_NAME: ${{ vars.MACOS_CERTIFICATE_NAME }}
+        run: |
+          npm install --global create-dmg
+          create-dmg \
+            --identity="$MACOS_CERTIFICATE_NAME" \
+            ./macos/build/Release/Dosei.app \
+            ./
+          mv ./Dosei*.dmg ./Dosei.dmg
+
+      - name: Notarize app bundle
+        env:
+          MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+          MACOS_NOTARIZATION_PWD: ${{ secrets.MACOS_NOTARIZATION_PWD }}
+        run: |
+          xcrun notarytool store-credentials "notarytool-profile" --apple-id "$MACOS_NOTARIZATION_APPLE_ID" --team-id "$MACOS_NOTARIZATION_TEAM_ID" --password "$MACOS_NOTARIZATION_PWD"
+
+          xcrun notarytool submit "Dosei.dmg" --keychain-profile "notarytool-profile" --wait
+          
+          xcrun stapler staple "Dosei.dmg"
+
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dosei.dmg
+          path: Dosei.dmg
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: Dosei.dmg
+          merge-multiple: true
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Dosei.dmg
