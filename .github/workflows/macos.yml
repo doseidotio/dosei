@@ -26,6 +26,9 @@ jobs:
         with:
           cache-all-crates: true
 
+      - name: Install x86_64-apple-darwin
+        run: rustup target add x86_64-apple-darwin
+
       - name: Build macOS Rust
         run: ./scripts/macos_rust_build.sh
 
