@@ -69,7 +69,7 @@ jobs:
           /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime "$RESOURCES_PATH/bin/macos-rust"
           
           # Codesign App Bundle
-          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --entitlements "macos/Dosei.entitlements" macos/build/Release/Dosei.app
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --entitlements "macos/Dosei/Dosei.entitlements" macos/build/Release/Dosei.app
 
       - name: Create DMG
         env:
