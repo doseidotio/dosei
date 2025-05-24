@@ -25,6 +25,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           cache-all-crates: true
+          cache-on-failure: true
 
       - name: Install x86_64-apple-darwin
         run: rustup target add x86_64-apple-darwin
