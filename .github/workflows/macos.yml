@@ -64,16 +64,23 @@ jobs:
           
           RESOURCES_PATH="macos/Dosei/Contents/Resources"
           
-          # Codesign Dosei CLI and macos-rust
+          APP_PATH="macos/build/Release/Dosei.app"
+          RESOURCES_PATH="$APP_PATH/Contents/Resources"
+          MACOS_PATH="$APP_PATH/Contents/MacOS"
+          
+          # Sign all binaries with hardened runtime and timestamp
+          echo "Signing individual binaries..."
           /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --timestamp "$RESOURCES_PATH/dosei"
           /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --timestamp "$RESOURCES_PATH/macos-rust"
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --timestamp "$MACOS_PATH/Dosei"
           
-          # Codesign App Bundle
-          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --timestamp --entitlements "macos/Dosei/Dosei.entitlements" macos/build/Release/Dosei.app
+          # Sign the entire App Bundle last
+          echo "Signing app bundle..."
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --timestamp --entitlements "macos/Dosei/Dosei.entitlements" "$APP_PATH"
 
       - name: Create DMG
         env:
-          MACOS_CERTIFICATE_NAME: ${{ secrets.MACOS_CERTIFICATE_NAME }}
+          MACOS_CERTIFICATE_NAME: ${{ vars.MACOS_CERTIFICATE_NAME }}
         run: |
           npm install --global create-dmg
           create-dmg \
