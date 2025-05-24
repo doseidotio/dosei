@@ -4,9 +4,6 @@ on:
   push:
     tags:
       - '*'
-  pull_request:
-    branches:
-      - '*'
 
 permissions:
   contents: write
@@ -108,17 +105,17 @@ jobs:
           name: Dosei.dmg
           path: Dosei.dmg
 
-#  release:
-#    name: Release
-#    runs-on: ubuntu-latest
-#    needs: [build]
-#    steps:
-#      - uses: actions/download-artifact@v4
-#        with:
-#          pattern: Dosei.dmg
-#          merge-multiple: true
-#      - name: Release
-#        uses: softprops/action-gh-release@v2
-#        with:
-#          files: |
-#            Dosei.dmg
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: Dosei.dmg
+          merge-multiple: true
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Dosei.dmg
