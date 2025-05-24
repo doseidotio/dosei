@@ -80,6 +80,19 @@ jobs:
             ./
           mv ./Dosei*.dmg ./Dosei.dmg
 
+      - name: Notarize app bundle
+        env:
+          MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+          MACOS_NOTARIZATION_PWD: ${{ secrets.MACOS_NOTARIZATION_PWD }}
+        run: |
+          xcrun notarytool store-credentials "notarytool-profile" --apple-id "$MACOS_NOTARIZATION_APPLE_ID" --team-id "$MACOS_NOTARIZATION_TEAM_ID" --password "$MACOS_NOTARIZATION_PWD"
+
+          xcrun notarytool submit "Dosei.dmg" --keychain-profile "notarytool-profile" --wait
+          
+          xcrun stapler staple "Dosei.dmg"
+
+
       - name: Upload DMG
         uses: actions/upload-artifact@v4
         with:
