@@ -21,25 +21,41 @@ jobs:
       - name: Install Rust
         uses: dsherret/rust-toolchain-file@v1
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          cache-all-crates: true
+      - name: macOS CI
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_CERTIFICATE_NAME: ${{ vars.MACOS_CERTIFICATE_NAME }}
+          MACOS_CI_KEYCHAIN_PWD: ${{ secrets.MACOS_CI_KEYCHAIN_PWD }}
+        run: |
+          # Turn our base64-encoded certificate back to a regular .p12 file
+          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+          
+          security create-keychain -p "{$MACOS_CI_KEYCHAIN_PWD}" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
+          security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
 
-      - name: Install x86_64-apple-darwin
-        run: rustup target add x86_64-apple-darwin
-
-      - name: Build macOS Rust
-        run: ./scripts/macos_rust_build.sh
-
-      - name: macOS Release
-        run: ./scripts/macos_release.sh
-
-      - name: Upload dmg
-        uses: actions/upload-artifact@v4
-        with:
-          name: Dosei.dmg
-          path: target/Dosei.dmg
+#      - name: Rust Cache
+#        uses: Swatinem/rust-cache@v2
+#        with:
+#          cache-all-crates: true
+#
+#      - name: Install x86_64-apple-darwin
+#        run: rustup target add x86_64-apple-darwin
+#
+#      - name: Build macOS Rust
+#        run: ./scripts/macos_rust_build.sh
+#
+#      - name: macOS Release
+#        run: ./scripts/macos_release.sh
+#
+#      - name: Upload dmg
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: Dosei.dmg
+#          path: target/Dosei.dmg
 
 #  release:
 #    name: Release
