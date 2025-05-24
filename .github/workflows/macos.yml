@@ -65,11 +65,11 @@ jobs:
           RESOURCES_PATH="macos/Dosei/Contents/Resources"
           
           # Codesign Dosei CLI and macos-rust
-          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime "$RESOURCES_PATH/dosei"
-          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime "$RESOURCES_PATH/macos-rust"
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --timestamp "$RESOURCES_PATH/dosei"
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --timestamp "$RESOURCES_PATH/macos-rust"
           
           # Codesign App Bundle
-          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --entitlements "macos/Dosei/Dosei.entitlements" macos/build/Release/Dosei.app
+          /usr/bin/codesign --verbose -f -s "$MACOS_CERTIFICATE_NAME" -o runtime --timestamp --entitlements "macos/Dosei/Dosei.entitlements" macos/build/Release/Dosei.app
 
       - name: Create DMG
         env:
