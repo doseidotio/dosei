@@ -155,7 +155,7 @@ export default function ConsoleLayout({ children }) {
                 <div className="flex items-center gap-5">
                   <div className="hidden min-[416px]:contents">
                     <div className="text-sm">
-                      Connected to: {infoQuery.data.name.replace("api.", "")}; Version: {infoQuery.data.version}
+                      Connected to: {infoQuery.data.name}; Version: {infoQuery.data.version}
                     </div>
                     <Link target="_blank" href={process.env.NEXT_PUBLIC_DISCORD_INVITE} className={clsx(
                       "rounded-md px-2.5 py-1.5 text-sm",

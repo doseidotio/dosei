@@ -29,6 +29,10 @@ export const getContinuePathAndDelete = () => {
   return continueURI;
 };
 
+export const storeApiBaseURL = (apiBaseURL) => {
+  localStorage.setItem("api_base_url", apiBaseURL);
+};
+
 export const getApiBaseURL = () => {
   if (typeof window !== 'undefined') {
     const apiBaseURL = localStorage.getItem("api_base_url");
@@ -36,5 +40,5 @@ export const getApiBaseURL = () => {
       return apiBaseURL;
     }
   }
-  return process.env.NEXT_PUBLIC_API_BASE_URL;
+  return "http://127.0.0.1";
 };

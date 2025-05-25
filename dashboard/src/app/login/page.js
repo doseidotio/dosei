@@ -5,19 +5,22 @@ import {HeroPattern} from "@/components/HeroPattern";
 import {Footer} from "@/components/Footer";
 import {useRouter, useSearchParams} from "next/navigation";
 import {useEffect, Suspense} from "react";
-import {storeSessionFromString, getSession } from "@/utils/sessionUtils";
+import {storeSessionFromString, getSession, storeApiBaseURL} from "@/utils/sessionUtils";
 
 // Separate the component that uses useSearchParams
 function AuthHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const apiBaseUrl = searchParams.get('api_base_url');
   const session = searchParams.get('session');
 
   useEffect(() => {
+    if (apiBaseUrl) {
+      storeApiBaseURL(apiBaseUrl);
+    }
     const handleAsync = async () => {
       if (session) {
         try {
-          // Decode base64 session parameter
           const decodedSession = atob(session);
           storeSessionFromString(decodedSession);
           await router.push("/");
@@ -25,12 +28,10 @@ function AuthHandler() {
           console.error('Failed to decode session:', error);
         }
       } else {
-        // Check if user is already authenticated via getSession
         try {
           const existingSession = getSession();
 
           if (existingSession) {
-            // User is already authenticated, redirect to /
             await router.push("/");
           }
         } catch (error) {
@@ -40,7 +41,7 @@ function AuthHandler() {
       }
     };
     handleAsync();
-  }, [session, router]);
+  }, [apiBaseUrl, session, router]);
 
   return null; // This component only handles the auth logic
 }
