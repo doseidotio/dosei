@@ -3,7 +3,7 @@ members = [ "cli","doseid", "doseid-macros", "macos-rust", "schema", "util"]
 resolver = "2"
 
 [workspace.package]
-version = "0.0.6"
+version = "0.0.7"
 license = "AGPL-3.0"
 repository = "https://github.com/doseidotio/dosei"
 authors = ["Dosei Team <hi@dosei.io>"]
